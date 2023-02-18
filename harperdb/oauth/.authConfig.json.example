@@ -1,0 +1,12 @@
+{
+	"client": {
+		"id": "1234",
+		"secret": "12234"
+	},
+	"loginPath": "/login/github",
+	"callback": "http://localhost:9926/oauth/callback",
+	"schema": "hdb_auth",
+	"table": "sessions",
+	"salt": "input here a random string",
+	"logout": "/logout"
+}
