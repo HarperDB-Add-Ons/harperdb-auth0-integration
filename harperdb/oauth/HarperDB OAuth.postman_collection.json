@@ -1,0 +1,132 @@
+{
+	"info": {
+		"_postman_id": "1bef9c6d-d752-4273-aefe-c6e286594664",
+		"name": "HarperDB OAuth",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Setup Auth Schema",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic {{basic_token}}",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "{{hdb_cf_url}}/{{cf_name}}/setup",
+					"host": ["{{hdb_cf_url}}"],
+					"path": ["{{cf_name}}", "setup"]
+				},
+				"description": "Create the Auth schema and table where the HDB Tokens are stored.\n\nThis route requires your basic HarperDB Token (the base64 encoded value of the string '{{username}}:{{password}}' containing your HarperDB credentials.\n\nResponse: 'HDB Auth has been setup'"
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{hdb_cf_url}}/{{cf_name}}/login/github",
+					"host": ["{{hdb_cf_url}}"],
+					"path": ["{{cf_name}}", "login", "github"]
+				},
+				"description": "This is an example route to login to Github. It returns a 302 redirect to the Github authorization page.\n\n**This is best used in a browser**\n\nSave the response to the hdb_token environment key"
+			},
+			"response": []
+		},
+		{
+			"name": "Create Schema",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "harperdb {{hdb_token}}",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "{{hdb_cf_url}}/{{cf_name}}/create/schema/{{schema}}",
+					"host": ["{{hdb_cf_url}}"],
+					"path": ["{{cf_name}}", "create", "schema", "{{schema}}"]
+				},
+				"description": "This route uses the HDB Token returned from the login endpoint to create a schema.\n\nResponse: '{\"message\":\"schema 'example' successfully created\"}'"
+			},
+			"response": []
+		},
+		{
+			"name": "Create Table",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "harperdb {{hdb_token}}",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "{{hdb_cf_url}}/{{cf_name}}/create/table/{{schema}}/{{table}}",
+					"host": ["{{hdb_cf_url}}"],
+					"path": ["{{cf_name}}", "create", "table", "{{schema}}", "{{table}}"]
+				},
+				"description": "This route uses the HDB Token returned from the login endpoint to create a table.\n\nResponse: '{\"message\":\"table 'example' successfully created\"}'"
+			},
+			"response": []
+		},
+		{
+			"name": "Insert Record",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "harperdb {{hdb_token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"items\": [1, 2, 3, 4]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{hdb_cf_url}}/{{cf_name}}/{{schema}}/{{table}}",
+					"host": ["{{hdb_cf_url}}"],
+					"path": ["{{cf_name}}", "{{schema}}", "{{table}}"]
+				},
+				"description": "This route uses the HDB Token returned from the login endpoint to insert data to a table.\n\nThe payload can be an object or an array of objects."
+			},
+			"response": []
+		},
+		{
+			"name": "Read Record",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "harperdb {{hdb_token}}",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "{{hdb_cf_url}}/{{cf_name}}/{{schema}}/{{table}}/{{id}}",
+					"host": ["{{hdb_cf_url}}"],
+					"path": ["{{cf_name}}", "{{schema}}", "{{table}}", "{{id}}"]
+				},
+				"description": "This route uses the HDB Token returned from the login endpoint to read data from a table."
+			},
+			"response": []
+		}
+	]
+}

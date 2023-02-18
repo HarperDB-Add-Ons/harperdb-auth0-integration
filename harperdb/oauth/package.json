@@ -1,0 +1,17 @@
+{
+	"name": "hdb-cf-oauth",
+	"version": "1.0.0",
+	"description": "The is a [HarperDB](https://harperdb.io/) Custom Function to integrate OAuth2.0 authorization with major providers.",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [],
+	"author": "",
+	"type": "module",
+	"license": "ISC",
+	"dependencies": {
+		"axios": "^0.27.2",
+		"fastify-oauth2": "^4.6.0"
+	}
+}
