@@ -1,6 +1,7 @@
 import { timingSafeEqual, randomBytes, pbkdf2 } from 'crypto';
 import { existsSync, readFileSync } from 'fs';
-import oauthPlugin from 'fastify-oauth2';
+import { getAccessToken } from './auth0.js';
+
 import { fileURLToPath } from 'url';
 import { join } from 'path';
 import { promisify } from 'util';
@@ -29,11 +30,15 @@ const CONFIG = existsSync(configFilePath)
 			},
 	  };
 
-
 const makeHash = async (token) => (await pbkdf2Async(token, CONFIG.salt, 100000, 64, 'sha512')).toString('hex');
 
 const extractToken = (authorizationHeader) => {
+	if (!authorizationHeader) {
+		throw new Error('Missing Authorization Header');
+	}
+
 	const [type, fullToken] = authorizationHeader.split(' ');
+
 	if (type !== 'harperdb') {
 		throw new Error('Invalid Authorization Type');
 	}
@@ -83,21 +88,26 @@ async function setupSchema(request, response, hdbCore, logger) {
 }
 
 const loadRoutes = async ({ server, hdbCore }) => {
-	server.register(oauthPlugin, {
-		name: 'githubOAuth2',
-		credentials: {
-			client: CONFIG.client,
-			auth: oauthPlugin[CONFIG.provider],
-		},
-		// register a server url to start the redirect flow
-		startRedirectPath: CONFIG.loginPath,
-		// facebook redirect here after the user login
-		callbackUri: CONFIG.callback,
+	server.get('/login', async function (_, reply) {
+		const url = `${CONFIG.auth0ApplicationUrl}/authorize?response_type=code&client_id=${CONFIG.client.id}&redirect_uri=${CONFIG.callback}`;
+		reply.redirect(url);
 	});
 
 	const callback = CONFIG.callback.split('/').pop();
-	server.get(`/${callback}`, async function (request) {
-		const { access_token } = await this.githubOAuth2.getAccessTokenFromAuthorizationCodeFlow(request);
+	server.get(`/${callback}`, async function (request, reply) {
+		const {
+			query: { code },
+		} = request;
+
+		if (!code) return reply.code(400).send('Missing code');
+
+		const { access_token } = await getAccessToken(
+			CONFIG.auth0ApplicationUrl,
+			CONFIG.client.id,
+			CONFIG.client.secret,
+			CONFIG.callback,
+			code
+		);
 
 		const hdbToken = await makeHash(access_token);
 		const hdbTokenUser = (await randomBytesAsync(12)).toString('hex');

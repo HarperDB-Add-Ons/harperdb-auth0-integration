@@ -5,6 +5,7 @@
 	},
 	"loginPath": "/login/github",
 	"callback": "http://localhost:9926/oauth/callback",
+	"auth0ApplicationUrl": "https://auth0.com",
 	"schema": "hdb_auth",
 	"table": "sessions",
 	"salt": "input here a random string",
